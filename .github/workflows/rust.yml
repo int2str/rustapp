@@ -20,8 +20,13 @@ jobs:
     - name: 🚀 Checkout code
       uses: actions/checkout@v4
 
+    - name: 📌 Remember short commit ID
+      run: |
+        calculated_sha=$(git rev-parse --short ${{ github.sha }})
+        echo "COMMIT_SHORT_SHA=$calculated_sha" >> $GITHUB_ENV
+
     - name: 🔨 Build
-      run: cargo build
+      run: cargo build --release
 
     - name: ✅ Run tests
       run: cargo test --no-fail-fast
@@ -31,3 +36,10 @@ jobs:
 
     - name: 🔍 Linting
       run: cargo clippy -- -D warnings
+
+    - name: 💾 Saving artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: rustap-${{ env.COMMIT_SHORT_SHA }}
+        path: target/release/rustapp
+        if-no-files-found: error
